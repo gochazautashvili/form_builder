@@ -39,9 +39,9 @@ export function DataTableColumnHeader({
       <Popover>
         <PopoverTrigger asChild>
           <Button
+            className="-ml-3 h-8 text-sm capitalize text-black data-[state=open]:bg-accent"
             variant="ghost"
             size="sm"
-            className="-ml-3 h-8 text-sm capitalize text-black data-[state=open]:bg-accent"
           >
             <span>{title}</span>
             {tableColumn.getIsSorted() === "desc" ? (
