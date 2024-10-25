@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name          String
+  email         String @unique
+  hash_password String
+
+  lists List[]
+
+  @@map("organizations")
+}
+
+model List {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  title       String
+  background  String
+  description String
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @db.ObjectId
+
+  columns Column[]
+  rows    Row[]
+
+  form Form?
+
+  createdAt DateTime @default(now())
+
+  @@map("lists")
+}
+
+model Column {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String
+  description String
+  type        Type
+
+  options Option[]
+
+  question Question?
+
+  list   List   @relation(fields: [listId], references: [id])
+  listId String @db.ObjectId
+
+  @@map("columns")
+}
+
+model Row {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  content String
+
+  list   List   @relation(fields: [listId], references: [id])
+  listId String @db.ObjectId
+
+  @@map("rows")
+}
+
+model Option {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name  String
+  color String
+
+  column   Column? @relation(fields: [columnId], references: [id])
+  columnId String? @db.ObjectId
+
+  question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?   @db.ObjectId
+
+  @@map("options")
+}
+
+model Form {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  questions Question[]
+  links     Link[]
+
+  list   List   @relation(fields: [listId], references: [id])
+  listId String @unique @db.ObjectId
+
+  @@map("forms")
+}
+
+model Link {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  code     String @unique @default(cuid())
+  name     String @default("link name")
+  location String @default("link location")
+
+  form   Form   @relation(fields: [formId], references: [id])
+  formId String @db.ObjectId
+
+  @@map("links")
+}
+
+model Question {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  type     Type
+  question String
+  required Boolean @default(false)
+
+  form   Form   @relation(fields: [formId], references: [id])
+  formId String @db.ObjectId
+
+  column   Column @relation(fields: [columnId], references: [id])
+  columnId String @unique @db.ObjectId
+
+  options Option[]
+
+  @@map("questions")
+}
+
+enum Type {
+  TEXT
+  DATE
+  CHOICE
+  NUMBER
+  PERSON
+  TEXTAREA
+}
